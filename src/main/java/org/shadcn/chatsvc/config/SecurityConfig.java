@@ -14,9 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-    private static final String[] PUBLIC_ENDPOINTS = {
-        "/email/send", "/swagger-ui/**", "/v3/api-docs/**",
-    };
+    private static final String[] PUBLIC_ENDPOINTS = {"/email/send", "/swagger-ui/**", "/v3/api-docs/**", "/ws/**"};
 
     private final CustomJwtDecoder customJwtDecoder;
 

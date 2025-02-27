@@ -2,7 +2,6 @@ package org.shadcn.chatsvc.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
 ;
 
 @Data

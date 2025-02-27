@@ -1,5 +1,7 @@
 package org.shadcn.chatsvc.service.impl;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -11,21 +13,22 @@ import org.shadcn.chatsvc.service.IChatRoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
-
 @Service
 public class ChatMessageService implements IChatMessageService {
-    //refactor cho nay gium nhen dont use autowired
+    // refactor cho nay gium nhen dont use autowired
     @Autowired
     private ChatMessageRepository repository;
+
     @Autowired
     private IChatRoomService chatRoomService;
 
     @Override
     public ChatMessage save(ChatMessage chatMessage) {
-        String chatId = chatRoomService.getChatRoomId(chatMessage.getSenderId(), chatMessage.getRecipientId(), true)
+        String chatId = chatRoomService
+                .getChatRoomId(chatMessage.getSenderId(), chatMessage.getRecipientId(), true)
                 .orElseThrow(() -> new IllegalArgumentException("Chat room doesn't exist"));
         chatMessage.setChatId(chatId);
+        chatMessage.setTimestamp(LocalDateTime.now());
         repository.save(chatMessage);
         return chatMessage;
     }
@@ -36,4 +39,8 @@ public class ChatMessageService implements IChatMessageService {
         return chatId.map(repository::findByChatId).orElse(new ArrayList<>());
     }
 
+    @Override
+    public ChatMessage findLastMessageByUserId(String userId) {
+        return repository.findFirstBySenderIdOrRecipientIdOrderByTimestampDesc(userId, userId);
+    }
 }
