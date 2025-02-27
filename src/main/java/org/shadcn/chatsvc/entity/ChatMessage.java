@@ -1,7 +1,7 @@
 package org.shadcn.chatsvc.entity;
 
-
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -23,5 +23,5 @@ public class ChatMessage {
     private String senderId;
     private String recipientId;
     private String content;
-    private LocalDate timestamp;
+    private LocalDateTime timestamp;
 }

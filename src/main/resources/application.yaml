@@ -23,3 +23,13 @@ spring:
 #          org.apache.kafka.common.security.scram.ScramLoginModule required
 #          username="${KAFKA_USERNAME}"
 #          password="${KAFKA_PASSWORD}";
+
+#logging:
+#  level:
+#    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+#    org.springframework.data.mongodb.core.MongoRepository: DEBUG
+    
+
+app:
+  services:
+    identity: http://localhost:8080/identity

@@ -1,6 +1,5 @@
 package org.shadcn.chatsvc.entity;
 
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -17,6 +16,7 @@ import lombok.NoArgsConstructor;
 public class ChatRoom {
     @Id
     private String id;
+
     private String chatId;
     private String senderId;
     private String recipientId;
