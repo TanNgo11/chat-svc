@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.shadcn.chatsvc.dto.request.DisconnectedUserPayload;
 import org.shadcn.chatsvc.dto.response.ConversationResponse;
 import org.shadcn.chatsvc.dto.response.UserProfileResponse;
 import org.shadcn.chatsvc.entity.ChatMessage;
@@ -37,17 +38,28 @@ public class UserService implements IUserService {
     IChatMessageService chatMessageService;
 
 
-    public void saveUser(User user) {
-        user.setStatus(Status.ONLINE);
-        repository.save(user);
+    public ConversationResponse saveUser(User user) {
+        User existingUser = repository.findByUserId(user.getUserId());
+        if (existingUser == null) {
+            user.setStatus(Status.ONLINE);
+            existingUser = repository.save(user);
+        } else {
+            existingUser.setStatus(Status.ONLINE);
+            existingUser = repository.save(existingUser);
+        }
+        ChatMessage lastMessage = chatMessageService.findLastMessageByUserId(existingUser.getUserId());
+        return new ConversationResponse(existingUser.getUserId(), existingUser.getFullName(), existingUser.getStatus(), existingUser.getAvatar(), lastMessage);
     }
 
-    public void disconnect(User user) {
-        User storedUser = repository.findById(user.getId()).orElse(null);
-        if (storedUser != null) {
-            storedUser.setStatus(Status.OFFLINE);
-            repository.save(storedUser);
+    public ConversationResponse disconnect(DisconnectedUserPayload user) {
+        User existingUser = repository.findByUserId(user.getUserId());
+        if (existingUser != null) {
+            existingUser.setStatus(Status.OFFLINE);
+            User result = repository.save(existingUser);
+            ChatMessage lastMessage = chatMessageService.findLastMessageByUserId(result.getUserId());
+            return new ConversationResponse(result.getUserId(), result.getFullName(), result.getStatus(), result.getAvatar(), lastMessage);
         }
+        return null;
     }
 
     public List<User> findConnectedUsers() {
@@ -55,9 +67,10 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public List<User> findAllByUserIdIsIn(List<Long> ids) {
-        return userRepository.findAllByUserIdIsIn(ids);
+    public List<User> findAllByUserIdIsIn(List<String> ids) {
+        return List.of();
     }
+
 
     @Override
     public List<ConversationResponse> findAllUsersInConversationList() {
@@ -67,12 +80,11 @@ public class UserService implements IUserService {
         List<ChatRoom> listChatRooms = chatRoomService
                 .findChatRoomsBySenderIdOrRecipientId(currentUser.getId(), currentUser.getId());
 
-        Set<Long> userIds = listChatRooms.stream()
+        Set<String> userIds = listChatRooms.stream()
                 .flatMap(chatRoom -> Stream.of(chatRoom.getSenderId(), chatRoom.getRecipientId()))
-                .map(Long::valueOf)
-                .filter(userId -> !Objects.equals(userId, currentUserId))
+                .map(String::valueOf)
+                .filter(userId -> !Objects.equals(userId, String.valueOf(currentUserId)))
                 .collect(Collectors.toSet());
-
         List<User> users = userRepository.findAllByUserIdIsIn(new ArrayList<>(userIds));
 
         List<ConversationResponse> conversationResponses = users.stream()
